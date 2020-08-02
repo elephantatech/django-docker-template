@@ -2,11 +2,9 @@
 
 Boilerplate template to start development with Django v3.0.8 and djangorestframework v3.11.0 with postgresSQL database backend inside Docker container.
 
-
-
 ## WARNINGS
 
-This is for development only. You will have further secure the ports and other configuration settings for deployment to staging and production. 
+This is for development only. You will have further secure the ports and other configuration settings for deployment to staging and production.
 
 ## Installation
 
@@ -35,8 +33,6 @@ Pull requests are welcome. For major changes, please open an issue first to disc
 Please make sure to update tests as appropriate.
 
 Also update the changelog as well [changelog](/changelog.md)
-
-
 
 ## Contributors
 
