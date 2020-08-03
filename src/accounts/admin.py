@@ -1,4 +1,10 @@
 from django.contrib import admin
-from models import accountUsers
+from django.contrib.auth.admin import UserAdmin 
+
+from models import CustomUser
 # Register your models here.
-admin.Register()
+
+class CustomUserAdmin(UserAdmin):
+    model = CustomUser
+
+admin.site.register(CustomUser, CustomUserAdmin)

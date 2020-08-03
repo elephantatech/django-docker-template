@@ -37,6 +37,11 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
+    # 3rd Party
+    'rest_framework',
+
+    # local apps
+    'accounts.apps.AccountsConfig'
 ]
 
 MIDDLEWARE = [
@@ -122,3 +127,21 @@ USE_TZ = True
 # https://docs.djangoproject.com/en/3.0/howto/static-files/
 
 STATIC_URL = '/static/'
+
+
+# customer user model
+AUTH_USER_MODEL = 'accounts.CustomUser'
+
+# rest authentication classes
+REST_FRAMEWORK = {
+    'DEFAULT_AUTHENTICATION_CLASSES': [
+        'rest_framework.authentication.SessionAuthentication', 
+        'rest_framework.authentication.BasicAuthentication'
+        # For tokens comment out the line above and uncomment the line below.
+        # Make sure to update INSTALLED_APPS too and `migrate` the database.
+        # 'rest_framework.authentication.TokenAuthentication',
+    ],
+}
+
+# when using email verification send to console
+EMAIL_BACKEND = 'django.core.mail.backends.console.EmailBackend'

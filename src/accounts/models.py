@@ -1,8 +1,9 @@
 from django.db import models
 from django.contrib.auth.models import (
-    AbstractBaseUser
+    AbstractBaseUser,
+    PermissionsMixin
 )
 
 # Create your models here.
-class accountUsers (AbstractBaseUser):
-    email = models.Email
+class CustomUser (AbstractBaseUser, PermissionsMixin):
+    pass
