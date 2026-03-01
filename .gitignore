@@ -138,3 +138,11 @@ dmypy.json
 cython_debug/
 
 .vscode
+.idea/
+
+# ruff
+.ruff_cache/
+
+# uv
+.python-version
+.claude

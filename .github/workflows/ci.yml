@@ -1,0 +1,95 @@
+name: CI
+
+on:
+  push:
+    branches: [master, rebuild/v2]
+  pull_request:
+    branches: [master]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          allow-prereleases: true
+      - run: uv sync --all-extras
+      - run: uv run ruff check .
+      - run: uv run ruff format --check .
+
+  test:
+    runs-on: ubuntu-latest
+    defaults:
+      run:
+        working-directory: src
+    services:
+      postgres:
+        image: postgres:17
+        env:
+          POSTGRES_DB: test_db
+          POSTGRES_USER: postgres
+          POSTGRES_PASSWORD: postgres
+        ports:
+          - 5432:5432
+        options: >-
+          --health-cmd="pg_isready -U postgres"
+          --health-interval=5s
+          --health-timeout=3s
+          --health-retries=5
+    env:
+      DATABASE_URL: postgres://postgres:postgres@localhost:5432/test_db
+      SECRET_KEY: ci-test-secret-key-not-for-prod
+    steps:
+      - uses: actions/checkout@v4
+      - uses: astral-sh/setup-uv@v5
+        with:
+          version: "latest"
+      - uses: actions/setup-python@v5
+        with:
+          python-version: "3.14"
+          allow-prereleases: true
+      - run: uv sync --all-extras
+      - run: uv run pytest -v
+
+  integration:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Build and start services
+        run: docker compose up -d --build --wait
+        timeout-minutes: 5
+      - name: Wait for web service
+        run: |
+          for i in $(seq 1 30); do
+            if curl -sf http://localhost:8000/api/health/; then
+              echo "Web service is ready"
+              break
+            fi
+            echo "Waiting for web service... ($i/30)"
+            sleep 2
+          done
+      - name: Run migrations
+        run: docker compose exec -T web /app/.venv/bin/python manage.py migrate
+      - name: Setup groups
+        run: docker compose exec -T web /app/.venv/bin/python manage.py setup_groups
+      - name: Run integration tests
+        run: docker compose exec -T web /app/.venv/bin/python manage.py test_integration
+      - name: Verify health endpoint
+        run: |
+          STATUS=$(curl -sf http://localhost:8000/api/health/ | python3 -c "import sys,json; print(json.load(sys.stdin)['status'])")
+          test "$STATUS" = "healthy"
+      - name: Verify Prometheus metrics
+        run: curl -sf http://localhost:8000/metrics | head -5
+      - name: Verify Prometheus scraper
+        run: curl -sf http://localhost:9090/-/ready
+      - name: Cleanup
+        if: always()
+        run: docker compose down -v
