@@ -1,5 +1,13 @@
 # Changelog
 
+## [Unreleased]
+
+### Added
+
+- **CRUD tutorial** (`TUTORIAL.md`) — step-by-step guide to building a new API app (Products & Stock example) with models, serializers, permissions, views, URLs, admin, and tests
+- **GitHub issue templates** — form-based templates for bug reports and feature requests (`.github/ISSUE_TEMPLATE/`)
+- Tutorial link in README
+
 ## [2.0.0] - 2026-03-01
 
 Complete rebuild of the Django Docker template from scratch.
