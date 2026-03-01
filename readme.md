@@ -323,6 +323,10 @@ django-docker-template/
         └── tests/
 ```
 
+## Tutorial
+
+See the [TUTORIAL.md](TUTORIAL.md) for a step-by-step guide to building a new CRUD API app (Products & Stock example) using this template's conventions.
+
 ## CI/CD
 
 GitHub Actions runs two jobs on every push and pull request:
