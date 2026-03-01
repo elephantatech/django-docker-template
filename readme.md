@@ -325,12 +325,13 @@ django-docker-template/
 
 ## CI/CD
 
-GitHub Actions runs three jobs on every push and pull request:
+GitHub Actions runs two jobs on every push and pull request:
 
 1. **Lint** — `ruff check` and `ruff format --check`
 2. **Test** — `pytest` with a PostgreSQL 17 service container
-3. **Integration** — Full Docker Compose stack with migrations, group setup, integration tests, health check, and Prometheus verification
+
+Integration tests are available locally via `./scripts/run-integration-tests.sh`.
 
 ## License
 
-This project is provided as a template. See [LICENSE](LICENSE) for details.
+This project is licensed under the [Apache License 2.0](LICENSE).
