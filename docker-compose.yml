@@ -1,0 +1,53 @@
+services:
+  db:
+    image: postgres:17
+    environment:
+      POSTGRES_DB: ${POSTGRES_DB:-app}
+      POSTGRES_USER: ${POSTGRES_USER:-postgres}
+      POSTGRES_PASSWORD: ${POSTGRES_PASSWORD:-postgres}
+    ports:
+      - "5432:5432"
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD-SHELL", "pg_isready -U ${POSTGRES_USER:-postgres}"]
+      interval: 5s
+      timeout: 3s
+      retries: 5
+
+  web:
+    build: ./src
+    user: root
+    command: >
+      sh -c "uv sync --frozen --no-dev &&
+      /app/.venv/bin/gunicorn main.wsgi:application
+      --bind 0.0.0.0:8000
+      --workers 3
+      --access-logfile -
+      --reload"
+    volumes:
+      - ./src:/app
+    environment:
+      - DEBUG=${DEBUG:-true}
+      - SECRET_KEY=${SECRET_KEY:-change-me-in-production}
+      - ALLOWED_HOSTS=${ALLOWED_HOSTS:-*}
+      - DATABASE_URL=postgres://${POSTGRES_USER:-postgres}:${POSTGRES_PASSWORD:-postgres}@db:5432/${POSTGRES_DB:-app}
+      - ACCESS_TOKEN_LIFETIME_MINUTES=${ACCESS_TOKEN_LIFETIME_MINUTES:-30}
+      - REFRESH_TOKEN_LIFETIME_DAYS=${REFRESH_TOKEN_LIFETIME_DAYS:-1}
+    ports:
+      - "8000:8000"
+    depends_on:
+      db:
+        condition: service_healthy
+
+  prometheus:
+    image: prom/prometheus:latest
+    volumes:
+      - ./prometheus.yml:/etc/prometheus/prometheus.yml:ro
+    ports:
+      - "9090:9090"
+    depends_on:
+      - web
+
+volumes:
+  pgdata:
