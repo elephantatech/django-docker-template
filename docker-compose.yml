@@ -17,12 +17,14 @@ services:
 
   web:
     build: ./src
+    user: root
     command: >
+      sh -c "uv sync --frozen --no-dev &&
       /app/.venv/bin/gunicorn main.wsgi:application
       --bind 0.0.0.0:8000
       --workers 3
       --access-logfile -
-      --reload
+      --reload"
     volumes:
       - ./src:/app
     environment:
